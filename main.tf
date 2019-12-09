@@ -1,4 +1,5 @@
 resource "aws_acm_certificate" "default" {
+  count                     = var.create_cert == true ? 1 : 0
   provider                  = aws.acm_account
   domain_name               = var.domain_name
   subject_alternative_names = var.subject_alternative_names
@@ -13,7 +14,7 @@ resource "aws_acm_certificate" "default" {
 
 resource "aws_route53_record" "validation" {
   provider        = aws.route53_account
-  count           = length(var.subject_alternative_names) + 1
+  count           = var.create_cert == true ? length(var.subject_alternative_names) + 1 : 0
   name            = aws_acm_certificate.default.domain_validation_options[count.index]["resource_record_name"]
   type            = aws_acm_certificate.default.domain_validation_options[count.index]["resource_record_type"]
   zone_id         = var.hosted_zone_id
@@ -23,8 +24,8 @@ resource "aws_route53_record" "validation" {
 }
 
 resource "aws_acm_certificate_validation" "default" {
-  provider        = aws.acm_account
-  certificate_arn = aws_acm_certificate.default.arn
-
+  count                   = var.create_cert == true ? 1 : 0
+  provider                = aws.acm_account
+  certificate_arn         = aws_acm_certificate.default.arn
   validation_record_fqdns = aws_route53_record.validation.*.fqdn
 }

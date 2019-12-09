@@ -29,3 +29,7 @@ variable "tags" {
   description = "Extra tags to attach to the ACM certificate"
 }
 
+variable "create_cert" {
+  description = "whether to create an ACM cert or not"
+  default     = "false"
+}
